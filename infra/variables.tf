@@ -68,3 +68,4 @@ variable "node_instance_type" {
 }
 
 # Updated IAM permissions - Sat, Sep 20, 2025  9:44:53 AM
+# Updated IAM permissions - Sat, Sep 20, 2025  9:57:29 AM
