@@ -67,5 +67,9 @@ variable "node_instance_type" {
   default     = "t3.medium"
 }
 
-
+variable "cicd_user_arn" {
+  description = "ARN of the CI/CD user for cluster admin access"
+  type        = string
+  sensitive   = true
+}
 

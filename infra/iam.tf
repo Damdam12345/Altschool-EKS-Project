@@ -139,6 +139,11 @@ resource "kubernetes_config_map" "aws_auth" {
         userarn  = aws_iam_user.developer.arn
         username = "developer-readonly"
         groups   = ["readonly-group"]
+      },
+      {
+        userarn  = var.cicd_user_arn
+        username = "cicd-admin"
+        groups   = ["system:masters"]
       }
     ])
     mapRoles = yamlencode([
