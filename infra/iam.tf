@@ -73,7 +73,7 @@ resource "aws_iam_policy" "developer_readonly" {
         Action = [
           # EC2 permissions (VPC, subnets, instances)
           "ec2:Describe*",
-          
+         
           # EKS permissions
           "eks:DescribeCluster",
           "eks:ListClusters",
@@ -81,7 +81,21 @@ resource "aws_iam_policy" "developer_readonly" {
           "eks:ListNodegroups",
           "eks:DescribeAddon",
           "eks:ListAddons",
+
+          # RDS permissions
+          "rds:Describe*",
+          "rds:ListTagsForResource",
           
+          # DynamoDB permissions
+          "dynamodb:DescribeTable",
+          "dynamodb:ListTables",
+          "dynamodb:DescribeTimeToLive",
+          "dynamodb:DescribeBackup",
+          "dynamodb:ListBackups",
+          
+          # ElastiCache permissions
+          "elasticache:Describe*",
+         
           # IAM permissions
           "iam:GetRole",
           "iam:GetRolePolicy",
@@ -89,13 +103,13 @@ resource "aws_iam_policy" "developer_readonly" {
           "iam:GetUserPolicy",
           "iam:ListAttachedRolePolicies",
           "iam:ListAttachedUserPolicies",
-          
+         
           # Auto Scaling
           "autoscaling:Describe*",
-          
+         
           # Load Balancer permissions
           "elasticloadbalancing:Describe*",
-          
+         
           # CloudFormation
           "cloudformation:DescribeStacks",
           "cloudformation:DescribeStackResources",
@@ -116,9 +130,9 @@ resource "aws_iam_user_policy_attachment" "developer_readonly" {
 resource "aws_eks_access_entry" "developer" {
   cluster_name      = aws_eks_cluster.main.name
   principal_arn     = aws_iam_user.developer.arn
-  kubernetes_groups = ["system:masters"]
+  kubernetes_groups = ["readonly-users"]
   type              = "STANDARD"
-  
+ 
   depends_on = [aws_eks_cluster.main]
 }
 
@@ -130,6 +144,25 @@ resource "aws_eks_access_policy_association" "developer_readonly" {
 
   access_scope {
     type = "cluster"
+  }
+
+  depends_on = [aws_eks_access_entry.developer]
+}
+
+# Create RBAC for the custom group
+resource "kubernetes_cluster_role_binding" "developer_readonly" {
+  metadata {
+    name = "developer-readonly-binding"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "view"
+  }
+  subject {
+    kind      = "Group"
+    name      = "readonly-users"
+    api_group = "rbac.authorization.k8s.io"
   }
 
   depends_on = [aws_eks_access_entry.developer]
