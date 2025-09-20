@@ -116,7 +116,7 @@ resource "aws_iam_user_policy_attachment" "developer_readonly" {
 resource "aws_eks_access_entry" "developer" {
   cluster_name      = aws_eks_cluster.main.name
   principal_arn     = aws_iam_user.developer.arn
-  kubernetes_groups = ["system:authenticated"]
+  kubernetes_groups = ["system:masters"]
   type              = "STANDARD"
   
   depends_on = [aws_eks_cluster.main]
