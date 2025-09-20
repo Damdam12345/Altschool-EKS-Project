@@ -67,5 +67,5 @@ variable "node_instance_type" {
   default     = "t3.medium"
 }
 
-# Updated IAM permissions - Sat, Sep 20, 2025  9:44:53 AM
-# Updated IAM permissions - Sat, Sep 20, 2025  9:57:29 AM
+
+# Test CI/CD user - Sat, Sep 20, 2025 10:38:37 AM
