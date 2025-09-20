@@ -66,13 +66,3 @@ variable "node_instance_type" {
   type        = string
   default     = "t3.medium"
 }
-
-variable "cicd_user_arn" {
-  description = "ARN of the CI/CD user for cluster admin access"
-  type        = string
-  sensitive   = true
-}
-
-# Test CI/CD user - Sat, Sep 20, 2025  2:14:13 PM
-# Test CI/CD user - Sat, Sep 20, 2025  2:43:36 PM
-# Test CI/CD user - Sat, Sep 20, 2025  2:55:20 PM
