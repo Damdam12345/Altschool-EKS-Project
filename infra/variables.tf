@@ -67,3 +67,4 @@ variable "node_instance_type" {
   default     = "t3.medium"
 }
 
+# Updated IAM permissions - Sat, Sep 20, 2025  9:44:53 AM
