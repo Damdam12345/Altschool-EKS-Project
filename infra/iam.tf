@@ -126,30 +126,35 @@ resource "aws_iam_user_policy_attachment" "developer_readonly" {
   policy_arn = aws_iam_policy.developer_readonly.arn
 }
 
-# EKS Cluster Access for Developer User
-resource "aws_eks_access_entry" "developer" {
-  cluster_name      = aws_eks_cluster.main.name
-  principal_arn     = aws_iam_user.developer.arn
-  kubernetes_groups = ["readonly-users"]
-  type              = "STANDARD"
- 
-  depends_on = [aws_eks_cluster.main]
-}
-
-# Developer access policy for EKS
-resource "aws_eks_access_policy_association" "developer_readonly" {
-  cluster_name  = aws_eks_cluster.main.name
-  principal_arn = aws_iam_user.developer.arn
-  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-
-  access_scope {
-    type = "cluster"
+# aws-auth ConfigMap for EKS cluster access (READ-ONLY)
+resource "kubernetes_config_map" "aws_auth" {
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
   }
 
-  depends_on = [aws_eks_access_entry.developer]
+  data = {
+    mapUsers = yamlencode([
+      {
+        userarn  = aws_iam_user.developer.arn
+        username = "developer-readonly"
+        groups   = ["readonly-group"]
+      }
+    ])
+    mapRoles = yamlencode([
+      {
+        rolearn  = aws_iam_role.node.arn
+        username = "system:node:{{EC2PrivateDNSName}}"
+        groups = [
+          "system:bootstrappers",
+          "system:nodes",
+        ]
+      }
+    ])
+  }
 }
 
-# Create RBAC for the custom group
+# Read-only ClusterRole binding
 resource "kubernetes_cluster_role_binding" "developer_readonly" {
   metadata {
     name = "developer-readonly-binding"
@@ -157,13 +162,11 @@ resource "kubernetes_cluster_role_binding" "developer_readonly" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = "view"
+    name      = "view"  # Built-in read-only role
   }
   subject {
     kind      = "Group"
-    name      = "readonly-users"
+    name      = "readonly-group"
     api_group = "rbac.authorization.k8s.io"
   }
-
-  depends_on = [aws_eks_access_entry.developer]
 }
