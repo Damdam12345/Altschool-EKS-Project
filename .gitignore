@@ -1,6 +1,4 @@
 # Terraform
 .terraform/
-*.tfplan
-*.tfvars
 terraform.tfstate*
 retail-store-sample-app/
